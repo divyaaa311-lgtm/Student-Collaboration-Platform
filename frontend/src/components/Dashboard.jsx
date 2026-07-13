@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Note: Ensure your local import matches 'axios' or leave as standard 'axios'
 import { io } from 'socket.io-client';
 
-const axiosInstance = axiosActual; // Fallback to standard axios
+// ✅ Ensure your fetches look like this:
+const response = await axios.get(`${API_BASE}/api/projects`);
+ // Fallback to standard axios
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const socket = io(API_BASE);
 
