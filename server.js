@@ -33,16 +33,22 @@ io.on('connection', (socket) => {
     console.log(`🔌 A student connected live! ID: ${socket.id}`);
 });
 
-// --- API ROUTES ---
+// --- API ROUTES WITH PROTECTION SHIELDS ---
 
 app.get('/', (req, res) => {
     res.send('The Student Platform Server is Running Successfully!');
 });
 
-// Registration Route
+// Registration Route (With Password Length Shield!)
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        
+        // 🔒 Shield 1: Validate password length
+        if (!password || password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long!" });
+        }
+
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: "Email already registered!" });
         
@@ -72,12 +78,37 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Server error occurred" });
     }
+    // 📅 Shield 2: Clear timezones completely to compare absolute calendar dates safely!
+if (deadline) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Absolute midnight local time
+
+    const selectedDeadline = new Date(deadline);
+    selectedDeadline.setHours(0, 0, 0, 0); // Absolute midnight chosen date
+
+    // Strict validation: Reject if the date selected is before today's date
+    if (selectedDeadline < today) {
+        return res.status(400).json({ message: "❌ Deadline cannot be a date in the past!" });
+    }
+}
+
 });
 
-// Create Project Route
+// Create Project Route (With Time-Travel Deadline Shield!)
 app.post('/api/projects', async (req, res) => {
     try {
         const { title, description, skillsRequired, creatorId, deadline } = req.body;
+
+        // 📅 Shield 2: Prevent deadlines set in the past
+        if (deadline) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to compare only calendar dates
+            const selectedDeadline = new Date(deadline);
+            
+            if (selectedDeadline < today) {
+                return res.status(400).json({ message: "❌ Deadline cannot be a date in the past!" });
+            }
+        }
 
         const newProject = new Project({
             title,
@@ -114,6 +145,11 @@ app.post('/api/projects/:id/apply', async (req, res) => {
         const project = await Project.findById(req.params.id);
         if (!project) return res.status(404).json({ message: "Project not found!" });
 
+        // Double check deadline before saving application
+        if (project.deadline && new Date() > new Date(project.deadline)) {
+            return res.status(400).json({ message: "❌ This opportunity has expired!" });
+        }
+
         project.applicants.push({ studentName, studentEmail, linkedinUrl, introduction });
         await project.save();
 
@@ -126,7 +162,7 @@ app.post('/api/projects/:id/apply', async (req, res) => {
     }
 });
 
-// --- 🗑️ DELETION ENDPOINT ---
+// Deletion Endpoint
 app.delete('/api/projects/:id', async (req, res) => {
     try {
         const deletedProject = await Project.findByIdAndDelete(req.params.id);
