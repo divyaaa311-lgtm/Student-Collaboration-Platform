@@ -1,21 +1,139 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard'; // Import Dashboard
+import Dashboard from './components/Dashboard';
 
-// We create a clean workspace component for the entry gate (Login + Register)
+// 🌟 HIGH-CONTRASS PREMIUM ENTRY PORTAL WITH INTEGRATED MARKETING HUB
 function AuthPage() {
+  // Toggle state to switch between showing Login or Register form cleanly
+  const [authMode, setAuthMode] = useState('login');
+
   return (
-    <div style={{ backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
-      <div style={{ textAlign: 'center', backgroundColor: '#ffffff', padding: '20px', borderBottom: '1px solid #e3e6f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-        <h1 style={{ margin: '0', color: '#4e73df', fontSize: '2rem' }}>🎓 Student Collaboration Platform</h1>
-        <p style={{ margin: '5px 0 0 0', color: '#858796' }}>Connect, Collaborate, Build Teams</p>
+    <div className="min-h-screen bg-slate-900 font-sans text-slate-100 flex flex-col lg:flex-row antialiased">
+      
+      {/* 🧭 LEFT SIDE: COMPREHENSIVE PLATFORM INFO & BRANDING MARKETING HUB */}
+      <div className="lg:w-7/12 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-8 lg:p-16 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+        
+        {/* Subtle background glow effect anchors */}
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 mb-12 lg:mb-0">
+          <span className="text-3xl lg:text-4xl bg-indigo-500/20 p-2.5 rounded-2xl border border-indigo-500/30 shadow-inner">🚀</span>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-white">CollabHub</h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-400">The Student Network</p>
+          </div>
+        </div>
+
+        {/* Core Platform Presentation Content Section */}
+        <div className="max-w-xl my-auto space-y-6 lg:space-y-8">
+          <h2 className="text-3xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            Connect, Collaborate, & Build <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400">Your Dream Team</span>
+          </h2>
+          
+          <p className="text-base lg:text-lg text-slate-400 leading-relaxed font-medium">
+            CollabHub is a specialized, real-time workspace crafted exclusively for college campuses. Stop scrambling to find team members for hackathons, group projects, and research papers.
+          </p>
+
+          {/* Feature Breakdown Rows */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-start gap-4 group">
+              <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold p-2 rounded-xl mt-1 group-hover:bg-indigo-500/20 transition-all">⚡</div>
+              <div>
+                <h4 className="text-sm lg:text-base font-bold text-slate-200">Instant Live Announcements</h4>
+                <p className="text-xs lg:text-sm text-slate-400 mt-0.5">Catch newly posted opportunities immediately through secure, built-in websocket pipes.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 group">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold p-2 rounded-xl mt-1 group-hover:bg-emerald-500/20 transition-all">📅</div>
+              <div>
+                <h4 className="text-sm lg:text-base font-bold text-slate-200">Strict Deadline Management</h4>
+                <p className="text-xs lg:text-sm text-slate-400 mt-0.5">Track application deadlines clearly. Past opportunities are filtered out automatically.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 group">
+              <div className="bg-sky-500/10 border border-sky-500/20 text-sky-400 text-sm font-bold p-2 rounded-xl mt-1 group-hover:bg-sky-500/20 transition-all">🔗</div>
+              <div>
+                <h4 className="text-sm lg:text-base font-bold text-slate-200">LinkedIn Integrated Applications</h4>
+                <p className="text-xs lg:text-sm text-slate-400 mt-0.5">Apply seamlessly by sharing your specialized profile and a tailored developer introduction pitch.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Metrics Showcase Dashboard Segment */}
+        <div className="grid grid-cols-3 gap-4 border-t border-slate-800 pt-8 mt-12 lg:mt-0 max-w-md">
+          <div>
+            <p className="text-xl lg:text-2xl font-black text-white">100%</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">Campus Exclusive</p>
+          </div>
+          <div>
+            <p className="text-xl lg:text-2xl font-black text-indigo-400">Live</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">Socket Feeds</p>
+          </div>
+          <div>
+            <p className="text-xl lg:text-2xl font-black text-emerald-400">Verified</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">Profiles</p>
+          </div>
+        </div>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px', padding: '20px' }}>
-        <Register />
-        <Login />
+
+      {/* 🔐 RIGHT SIDE: DYNAMIC AUTH CONTROLLER PANEL */}
+      <div className="lg:w-5/12 bg-slate-950 p-6 lg:p-12 flex flex-col justify-center items-center relative">
+        <div className="w-full max-w-md space-y-8">
+          
+          {/* Controller Header Tab Selector */}
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-white tracking-tight sm:text-2xl">Get Started</h3>
+            <p className="text-xs text-slate-500 mt-1">Access the internal student developer workspace.</p>
+
+            {/* Premium Capsule Form Switcher Selector */}
+            <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-xl mt-6 shadow-inner">
+              <button 
+                onClick={() => setAuthMode('login')} 
+                className={`flex-1 text-center py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${authMode === 'login' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                🔐 Sign In Account
+              </button>
+              <button 
+                onClick={() => setAuthMode('register')} 
+                className={`flex-1 text-center py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${authMode === 'register' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                📝 Register Account
+              </button>
+            </div>
+          </div>
+
+          {/* Render Active Form Container With Styling Overrides */}
+          <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 lg:p-8 shadow-2xl relative group hover:border-slate-800 transition-all">
+            {authMode === 'login' ? (
+              <div>
+                <div className="mb-4 text-center sm:hidden">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Account Login</span>
+                </div>
+                <Login />
+              </div>
+            ) : (
+              <div>
+                <div className="mb-4 text-center sm:hidden">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Create Account</span>
+                </div>
+                <Register />
+              </div>
+            )}
+          </div>
+
+          <p className="text-center text-[11px] text-slate-600 font-medium">
+            Protected by internal token authorization protocols. For student security verification, always use your assigned platform credentials.
+          </p>
+        </div>
       </div>
+
     </div>
   );
 }
@@ -24,10 +142,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Route 1: The default home page shows login/register */}
         <Route path="/" element={<AuthPage />} />
-        
-        {/* Route 2: The dashboard path */}
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
@@ -35,180 +150,3 @@ function App() {
 }
 
 export default App;
-
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
-// import heroImg from './assets/hero.png'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <section id="center">
-//         <div className="hero">
-//           <img src={heroImg} className="base" width="170" height="179" alt="" />
-//           <img src={reactLogo} className="framework" alt="React logo" />
-//           <img src={viteLogo} className="vite" alt="Vite logo" />
-//         </div>
-//         <div>
-//           <h1>Get started</h1>
-//           <p>
-//             Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-//           </p>
-//         </div>
-//         <button
-//           type="button"
-//           className="counter"
-//           onClick={() => setCount((count) => count + 1)}
-//         >
-//           Count is {count}
-//         </button>
-//       </section>
-
-//       <div className="ticks"></div>
-
-//       <section id="next-steps">
-//         <div id="docs">
-//           <svg className="icon" role="presentation" aria-hidden="true">
-//             <use href="/icons.svg#documentation-icon"></use>
-//           </svg>
-//           <h2>Documentation</h2>
-//           <p>Your questions, answered</p>
-//           <ul>
-//             <li>
-//               <a href="https://vite.dev/" target="_blank">
-//                 <img className="logo" src={viteLogo} alt="" />
-//                 Explore Vite
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://react.dev/" target="_blank">
-//                 <img className="button-icon" src={reactLogo} alt="" />
-//                 Learn more
-//               </a>
-//             </li>
-//           </ul>
-//         </div>
-//         <div id="social">
-//           <svg className="icon" role="presentation" aria-hidden="true">
-//             <use href="/icons.svg#social-icon"></use>
-//           </svg>
-//           <h2>Connect with us</h2>
-//           <p>Join the Vite community</p>
-//           <ul>
-//             <li>
-//               <a href="https://github.com/vitejs/vite" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#github-icon"></use>
-//                 </svg>
-//                 GitHub
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://chat.vite.dev/" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#discord-icon"></use>
-//                 </svg>
-//                 Discord
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://x.com/vite_js" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#x-icon"></use>
-//                 </svg>
-//                 X.com
-//               </a>
-//             </li>
-//             <li>
-//               <a href="https://bsky.app/profile/vite.dev" target="_blank">
-//                 <svg
-//                   className="button-icon"
-//                   role="presentation"
-//                   aria-hidden="true"
-//                 >
-//                   <use href="/icons.svg#bluesky-icon"></use>
-//                 </svg>
-//                 Bluesky
-//               </a>
-//             </li>
-//           </ul>
-//         </div>
-//       </section>
-
-//       <div className="ticks"></div>
-//       <section id="spacer"></section>
-//     </>
-//   )
-// }
-
-// export default App
-// import React from 'react';
-
-// function App() {
-//   return (
-//     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-//       <h1>Student Collaboration Platform</h1>
-//       <p>Welcome to Day 2! Our React workspace is clean and ready.</p>
-//     </div>
-//   );
-// }
-
-// export default App;
-// import React from 'react';
-// import Register from './components/Register'; // Import our new registration block
-
-// function App() {
-//   return (
-//     <div style={{ fontFamily: 'sans-serif' }}>
-//       <div style={{ textAlign: 'center', backgroundColor: '#f8f9fa', padding: '10px', borderBottom: '1px solid #ddd' }}>
-//         <h1>Student Collaboration Platform</h1>
-//       </div>
-      
-//       {/* Show the registration form components below */}
-//       <Register />
-//     </div>
-//   );
-// }
-
-// export default App;
-// import React from 'react';
-// import Register from './components/Register';
-// import Login from './components/Login'; // 1. Import our new login block
-
-// function App() {
-//   return (
-//     <div style={{ fontFamily: 'sans-serif', margin: '0', padding: '0', backgroundColor: '#f4f6f9', minHeight: '100vh' }}>
-//       {/* Top Main Header Banner */}
-//       <div style={{ textAlign: 'center', backgroundColor: '#ffffff', padding: '20px', borderBottom: '1px solid #e3e6f0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-//         <h1 style={{ margin: '0', color: '#4e73df', fontSize: '2rem' }}>🎓 Student Collaboration Platform</h1>
-//         <p style={{ margin: '5px 0 0 0', color: '#858796' }}>Day 2: Interface Forms Workspace</p>
-//       </div>
-      
-//       {/* Container to position forms on the page */}
-//       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px', padding: '20px' }}>
-//         <Register />
-//         <Login />
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
