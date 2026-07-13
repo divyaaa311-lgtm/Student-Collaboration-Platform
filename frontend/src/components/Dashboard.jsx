@@ -3,13 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const socket = io(API_BASE);
 
 function Dashboard() {
   const navigate = useNavigate();
   
   const [userName, setUserName] = useState('Student'); 
   const [projects, setProjects] = useState([]); 
+
+  // View state toggle: 'all' shows everything, 'mine' shows only user's posts
+  const [viewMode, setViewMode] = useState('all');
 
   // Search, tag, and modal tracking memory layers
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,7 +32,7 @@ function Dashboard() {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/projects');
+      const response = await axios.get(`${API_BASE}/api/projects`);
       setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Error fetching projects:", err);
@@ -57,23 +61,29 @@ function Dashboard() {
       );
     });
 
+    // 🚀 Socket listener for deletions: wipes the card instantly without reload
+    socket.on('projectDeleted', (deletedProjectId) => {
+      setProjects((prevProjects) => prevProjects.filter((p) => p._id !== deletedProjectId));
+    });
+
     return () => {
       socket.off('projectCreated');
       socket.off('projectUpdated');
+      socket.off('projectDeleted');
     };
   }, [navigate]);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      const currentUserId = localStorage.getItem('studentId') || "6a51f27ebe108d97fd20cc86";
+      const currentUserId = localStorage.getItem('studentId');
 
-      await axios.post('http://localhost:5000/api/projects', {
+      await axios.post(`${API_BASE}/api/projects`, {
         title,
         description,
-        skillsRequired: skills ? skills.split(',') : [], 
+        skillsRequired: skills ? skills.split(',').map(s => s.trim()) : [], 
         creatorId: currentUserId,
-        deadline: deadline || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
+        deadline: deadline || null
       });
 
       setTitle('');
@@ -91,7 +101,7 @@ function Dashboard() {
     try {
       const savedEmail = localStorage.getItem('studentEmail') || 'test@college.edu';
       
-      await axios.post(`http://localhost:5000/api/projects/${activeApplyProject._id}/apply`, {
+      await axios.post(`${API_BASE}/api/projects/${activeApplyProject._id}/apply`, {
         studentName: userName,
         studentEmail: savedEmail,
         linkedinUrl,
@@ -108,8 +118,30 @@ function Dashboard() {
     }
   };
 
+  // 🗑️ FUNCTION TO DELETE A POST FROM THE DB
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm("⚠️ Are you sure you want to delete this opportunity permanentely?")) {
+      try {
+        await axios.delete(`${API_BASE}/api/projects/${projectId}`);
+        alert("🗑️ Post deleted successfully!");
+        fetchProjects();
+      } catch (err) {
+        alert("❌ Failed to remove post.");
+      }
+    }
+  };
+
+  const currentUserId = localStorage.getItem('studentId');
+
+  // Filter projects based on search query, tags, AND view mode choice
   const filteredProjects = projects.filter((project) => {
     if (!project) return false;
+    
+    // View mode filter
+    if (viewMode === 'mine' && project.creator?._id !== currentUserId && project.creator !== currentUserId) {
+      return false;
+    }
+
     const titleText = project.title || '';
     const descText = project.description || '';
     
@@ -143,155 +175,231 @@ function Dashboard() {
         </div>
       </nav>
 
-      {/* DASHBOARD CORE LAYOUT CONTAINER */}
+      {/* CORE LAYOUT */}
       <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* POST FORM PANEL (LEFT) */}
+        {/* PANEL (LEFT) */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs sticky top-24">
             <h3 className="text-lg font-bold text-slate-900 mb-1">Post an Opportunity</h3>
-            <p className="text-sm text-slate-500 mb-5">Fill in fields below to recruit your study team.</p>
+            <p className="text-sm text-slate-500 mb-5">Recruit your student dream team.</p>
             
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Project Title</label>
                 <input type="text" placeholder="e.g. AI Study Tool" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
               </div>
-              
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Project Goals</label>
                 <textarea placeholder="Describe your goals..." value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm h-24 resize-none focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
               </div>
-              
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Required Skills</label>
                 <input type="text" placeholder="React, Node, Python" value={skills} onChange={(e) => setSkills(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
               </div>
-
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Application Deadline</label>
                 <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-700 cursor-pointer" />
               </div>
-              
               <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer shadow-md mt-2">Post Opportunity</button>
             </form>
           </div>
         </div>
 
-        {/* FEED AND ADVANCED FILTERS PANEL (RIGHT) */}
-        <div className="lg:col-span-2">
+        {/* FEED PANEL (RIGHT) */}
+        <div className="lg:col-span-2 space-y-6">
           
-          {/* SEARCH & PILL FILTERS */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs mb-6 space-y-4">
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">🔍</span>
-              <input type="text" placeholder="Search projects by title or keywords..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+          {/* 🔘 VIEW TOGGLE CONTROLLER BAR */}
+          <div className="flex bg-slate-200/70 p-1 rounded-xl max-w-xs shadow-inner">
+            <button 
+              onClick={() => setViewMode('all')} 
+              className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${viewMode === 'all' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              🌐 All Feeds
+            </button>
+            <button 
+              onClick={() => setViewMode('mine')} 
+              className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${viewMode === 'mine' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              📂 My Posts
+            </button>
+          </div>
+
+          {/* SEARCH INPUT */}
+          <div className="relative w-full">
+            <span className="absolute left-4 top-3.5 text-slate-400 text-sm">🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search projects by title or keywords..." 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" 
+            />
+          </div>
+
+          {/* TAG FILTERS */}
+          {allUniqueTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 bg-white p-3 border border-slate-100 rounded-xl">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1">Filter:</span>
+              <button 
+                onClick={() => setSelectedTag('')} 
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedTag === '' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                All Skills
+              </button>
+              {allUniqueTags.map((tag, index) => (
+                <button 
+                  key={index} 
+                  onClick={() => setSelectedTag(tag)} 
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedTag.toLowerCase() === tag.toLowerCase() ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
+          )}
 
-            {allUniqueTags.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Filter:</span>
-                <button onClick={() => setSelectedTag('')} className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedTag === '' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>All Skills</button>
-                {allUniqueTags.map((tag, index) => (
-                  <button key={index} onClick={() => setSelectedTag(tag)} className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedTag.toLowerCase() === tag.toLowerCase() ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{tag}</button>
-                ))}
-              </div>
-            )}
+          {/* FEED LIST HEADER */}
+          <div className="flex justify-between items-center px-1">
+            <h2 className="text-lg font-bold text-slate-900">
+              {viewMode === 'all' ? 'Active Collaborations' : 'My Posted Opportunities'}
+            </h2>
+            <span className="text-xs font-semibold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full">
+              {filteredProjects.length} Cards
+            </span>
           </div>
 
-          {/* PROJECT FEED HEADER */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-900">Active Collaborations</h2>
-            <span className="bg-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">{filteredProjects.length} Found</span>
-          </div>
-
-          {/* FEED CARDS GRID */}
-          <div className="space-y-4">
+          {/* FEED GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => {
                 const hasExpired = project.deadline ? new Date() > new Date(project.deadline) : false;
+                const isOwner = project.creator?._id === currentUserId || project.creator === currentUserId;
+                
                 return (
-                  <div key={project._id} className={`bg-white border rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-indigo-200 transition-all group relative ${hasExpired ? 'opacity-65 border-dashed border-rose-200' : 'border-slate-200'}`}>
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${hasExpired ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-500'}`}>
-                          {hasExpired ? '⚠️ Expired' : 'OPPORTUNITY'}
-                        </span>
-                        <span className="text-xs text-slate-500 font-medium">
-                          👤 {project.creator && typeof project.creator === 'object' ? project.creator.name : "Student"}
-                        </span>
-                      </div>
+                  <div 
+                    key={project._id} 
+                    className={`bg-white border rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-indigo-200 transition-all group relative ${hasExpired ? 'opacity-65 border-dashed border-rose-200' : 'border-slate-200'}`}
+                  >
+                    {/* CARD TOP BAR */}
+                    <div className="flex justify-between items-start mb-3">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${hasExpired ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-500'}`}>
+                        {hasExpired ? '⚠️ Expired' : 'OPPORTUNITY'}
+                      </span>
                       
-                      <h4 className="text-base font-bold text-slate-900 mb-1">{project.title}</h4>
-                      <p className="text-sm text-slate-600 line-clamp-3 mb-4">{project.description}</p>
-                      
-                      {project.deadline && (
-                        <div className="text-xs text-slate-500 mb-4">
-                          📅 Deadline: <span className={hasExpired ? "text-rose-600 font-bold" : "text-slate-800 font-semibold"}>{new Date(project.deadline).toLocaleDateString()}</span>
-                        </div>
+                      {isOwner ? (
+                        <button
+                          onClick={() => handleDeleteProject(project._id)}
+                          className="text-rose-500 hover:text-rose-700 bg-rose-50 p-1.5 rounded-lg text-sm transition-all cursor-pointer"
+                          title="Delete this listing"
+                        >
+                          🗑️
+                        </button>
+                      ) : (
+                        <span className="text-xs font-medium text-slate-500">
+                          👤 {project.creator?.name || "Student"}
+                        </span>
                       )}
                     </div>
 
-                    <div className="space-y-4">
-                      {project.skillsRequired && project.skillsRequired.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {project.skillsRequired.map((skill, index) => (
-                            <button key={index} onClick={() => setSelectedTag(skill.trim())} className={`text-[11px] font-semibold px-2 py-1 rounded-md tracking-wide transition-all cursor-pointer ${selectedTag.toLowerCase() === skill.trim().toLowerCase() ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}>
-                              {skill.trim()}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                    {/* DETAILS */}
+                    <h3 className="text-base font-bold text-slate-900 mb-1">{project.title}</h3>
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-3">{project.description}</p>
+                    
+                    {project.deadline && (
+                      <p className="text-xs text-slate-500 mb-3">
+                        📅 Deadline: <span className={hasExpired ? "text-rose-600 font-bold" : "text-slate-800 font-semibold"}>{new Date(project.deadline).toLocaleDateString()}</span>
+                      </p>
+                    )}
 
+                    {/* SKILLS CONTAINER */}
+                    {project.skillsRequired && project.skillsRequired.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {project.skillsRequired.map((skill, index) => (
+                          <button 
+                            key={index} 
+                            onClick={() => setSelectedTag(skill.trim())} 
+                            className={`text-[11px] font-semibold px-2 py-1 rounded-md tracking-wide transition-all cursor-pointer ${selectedTag.toLowerCase() === skill.trim().toLowerCase() ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600'}`}
+                          >
+                            {skill.trim()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ACTION BUTTON */}
+                    {!isOwner && (
                       <button
                         disabled={hasExpired}
                         onClick={() => setActiveApplyProject(project)}
-                        className={`w-full text-center text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer ${hasExpired ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs shadow-emerald-50'}`}
+                        className={`w-full text-center text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer ${hasExpired ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs'}`}
                       >
                         {hasExpired ? 'Closed' : 'Apply for Opportunity 🚀'}
                       </button>
-                    </div>
+                    )}
+
+                    {/* APPLICANT REVIEW GRID (Visible only if applicants exist) */}
+                    {project.applicants && project.applicants.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          📥 Applications ({project.applicants.length})
+                        </h4>
+                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                          {project.applicants.map((applicant, i) => (
+                            <div key={i} className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-bold text-slate-800">{applicant.studentName}</span>
+                                <span className="text-slate-500 text-[11px]">{applicant.studentEmail}</span>
+                              </div>
+                              {applicant.linkedinUrl && (
+                                <a href={applicant.linkedinUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-semibold block mb-1.5">
+                                  🔗 LinkedIn ↗
+                                </a>
+                              )}
+                              <p className="text-slate-600 italic bg-white p-2 rounded-lg border border-slate-100">"{applicant.introduction}"</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
             ) : (
-              <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl">
-                <span className="text-3xl block mb-2">🔍</span>
-                <p className="text-slate-500 text-sm">No results match your search parameters.</p>
+              <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl text-slate-400">
+                <span className="text-3xl block mb-2">📁</span>
+                No results found in this view category.
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* POPUP CONTAINER MODAL OVERLAY BOX */}
+      {/* POPUP MODAL */}
       {activeApplyProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-xl relative animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex justify-between items-center mb-1">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-slate-900">Apply to Team</h3>
-              <button onClick={() => setActiveApplyProject(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer transition-colors">✕</button>
+              <button onClick={() => setActiveApplyProject(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">✕</button>
             </div>
             
-            <p className="text-xs text-indigo-600 font-medium mb-4">Registering interest for: "{activeApplyProject.title}"</p>
+            <p className="text-sm text-slate-500 mb-4">Registering interest for: <strong className="text-indigo-600">"{activeApplyProject.title}"</strong></p>
             
             <form onSubmit={handleApplySubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">LinkedIn Profile Link URL</label>
-                <input type="url" placeholder="https://linkedin.com/in/yourprofile" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+                <input type="url" placeholder="https://linkedin.com/in/username" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
               </div>
-              
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Self-Introduction & Pitch</label>
                 <textarea placeholder="Why do you want to join? Highlight your key skills..." value={introduction} onChange={(e) => setIntroduction(e.target.value)} required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm h-28 resize-none focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" />
               </div>
-              
               <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer shadow-md mt-2">Submit Application 📨</button>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
