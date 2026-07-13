@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Import Axios link tool
+import axios from 'axios';
 
 function Register() {
   const [name, setName] = useState('');
@@ -7,104 +7,73 @@ function Register() {
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     try {
-      // Send data straight to our backend API registration route
-      const response = await axios.post('http://localhost:5000/api/register', {
-        name,
-        email,
-        password
-      });
-
-      alert(`🎉 ${response.data.message}`);
-      // Clear the form fields after successful registration
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.post(`${API_BASE}/api/register`, { name, email, password });
+      alert("🎉 Registration successful! You can now sign in.");
       setName('');
       setEmail('');
       setPassword('');
-    } catch (error) {
-      // Display the exact error message coming from our backend logic
-      alert(`Error: ${error.response?.data?.message || "Registration failed"}`);
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration failed.");
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '30px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', backgroundColor: '#fff' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }}>Create an Account</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Full Name:</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
-        </div>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>College Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
-        </div>
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Password:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
-        </div>
-        <button type="submit" style={{ width: '100%', padding: '12px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Register</button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4 text-left">
+      <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Create Account</h3>
+      
+      {/* HIGH-CONTRAST NAME FIELD */}
+      <div>
+        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+          Full Name
+        </label>
+        <input 
+          type="text" 
+          placeholder="Enter your name" 
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required 
+          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all shadow-inner font-medium"
+        />
+      </div>
+
+      {/* HIGH-CONTRAST EMAIL FIELD */}
+      <div>
+        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+          College Email
+        </label>
+        <input 
+          type="email" 
+          placeholder="Enter your college email" 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required 
+          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all shadow-inner font-medium"
+        />
+      </div>
+
+      {/* HIGH-CONTRAST PASSWORD FIELD */}
+      <div>
+        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+          Password
+        </label>
+        <input 
+          type="password" 
+          placeholder="••••••••" 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required 
+          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all shadow-inner font-medium"
+        />
+      </div>
+
+      <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all cursor-pointer shadow-md mt-4">
+        Register Account
+      </button>
+    </form>
   );
 }
 
 export default Register;
-
-// import React, { useState } from 'react';
-
-// function Register() {
-//   // These 'states' act as the form's memory to track what the user types
-//   const [name, setName] = useState('');
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault(); // Prevents the webpage from reloading automatically
-//     console.log("Form submitted with:", { name, email, password });
-//     alert(`Form submitted for ${name}! Connection to backend comes next.`);
-//   };
-
-//   return (
-//     <div style={{ maxWidth: '400px', margin: '30px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-//       <h2>Create an Account</h2>
-//       <form onSubmit={handleSubmit}>
-//         <div style={{ marginBottom: '15px' }}>
-//           <label style={{ display: 'block', marginBottom: '5px' }}>Full Name:</label>
-//           <input 
-//             type="text" 
-//             value={name} 
-//             onChange={(e) => setName(e.target.value)} 
-//             required 
-//             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-//           />
-//         </div>
-//         <div style={{ marginBottom: '15px' }}>
-//           <label style={{ display: 'block', marginBottom: '5px' }}>College Email:</label>
-//           <input 
-//             type="email" 
-//             value={email} 
-//             onChange={(e) => setEmail(e.target.value)} 
-//             required 
-//             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-//           />
-//         </div>
-//         <div style={{ marginBottom: '15px' }}>
-//           <label style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
-//           <input 
-//             type="password" 
-//             value={password} 
-//             onChange={(e) => setPassword(e.target.value)} 
-//             required 
-//             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-//           />
-//         </div>
-//         <button type="submit" style={{ width: '100%', padding: '10px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-//           Register
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default Register;
