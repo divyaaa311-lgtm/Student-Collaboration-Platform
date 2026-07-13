@@ -11,12 +11,12 @@ const Project = require('./models/Project');
 
 const app = express();
 const server = http.createServer(app);
-
 const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:5173", 
-        methods: ["GET", "POST", "DELETE"]
-    }
+  cors: {
+    // Corrected origin array with your actual Vercel URL
+    origin: ["https://student-collaboration-platformvercelapp", "http://" ],
+    methods: ["GET", "POST"]
+  }
 });
 
 app.use(express.json());
@@ -25,12 +25,12 @@ app.use(cors());
 const MONGO_URI = "mongodb+srv://divyaaa311_db_user:oXwQeVZsNFtMj9KA@cluster0.g5ykr3o.mongodb.net/?appName=Cluster0";
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('🎉 Successfully connected to MongoDB!'))
-    .catch((err) => console.error('❌ Database connection error:', err));
+    .then(() => console.log('Successfully connected to MongoDB!'))
+    .catch((err) => console.error('Database connection error:', err));
 
 // --- LIVE SOCKET CONNECTION ---
 io.on('connection', (socket) => {
-    console.log(`🔌 A student connected live! ID: ${socket.id}`);
+    console.log(`A student connected live! ID: ${socket.id}`);
 });
 
 // --- API ROUTES WITH PROTECTION SHIELDS ---
@@ -44,7 +44,7 @@ app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
         
-        // 🔒 Shield 1: Validate password length
+        // Shield 1: Validate password length
         if (!password || password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters long!" });
         }
@@ -78,7 +78,7 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Server error occurred" });
     }
-    // 📅 Shield 2: Clear timezones completely to compare absolute calendar dates safely!
+    // Shield 2: Clear timezones completely to compare absolute calendar dates safely!
 if (deadline) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Absolute midnight local time
@@ -88,7 +88,7 @@ if (deadline) {
 
     // Strict validation: Reject if the date selected is before today's date
     if (selectedDeadline < today) {
-        return res.status(400).json({ message: "❌ Deadline cannot be a date in the past!" });
+        return res.status(400).json({ message: "Deadline cannot be a date in the past!" });
     }
 }
 
@@ -99,14 +99,14 @@ app.post('/api/projects', async (req, res) => {
     try {
         const { title, description, skillsRequired, creatorId, deadline } = req.body;
 
-        // 📅 Shield 2: Prevent deadlines set in the past
+        //Shield 2: Prevent deadlines set in the past
         if (deadline) {
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Reset time to compare only calendar dates
             const selectedDeadline = new Date(deadline);
             
             if (selectedDeadline < today) {
-                return res.status(400).json({ message: "❌ Deadline cannot be a date in the past!" });
+                return res.status(400).json({ message: "Deadline cannot be a date in the past!" });
             }
         }
 
