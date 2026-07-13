@@ -11,13 +11,29 @@ const ProjectSchema = new mongoose.Schema({
         required: true
     },
     skillsRequired: {
-        type: [String], // Array of skills, e.g., ["React", "Python"]
+        type: [String],
         default: []
     },
     creator: {
-        type: mongoose.Schema.Types.ObjectId, // Links the project to the specific User ID who made it
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    // 📅 Smart Deadline: Never breaks, automatically defaults to 7 days from now if missing
+    deadline: {
+        type: Date,
+        default: () => new Date(+new Date() + 7 * 24 * 60 * 60 * 1000)
+    },
+    // 👥 Applicants Array Tracker
+    applicants: {
+        type: [{
+            studentName: String,
+            studentEmail: String,
+            linkedinUrl: String,
+            introduction: String,
+            appliedAt: { type: Date, default: Date.now }
+        }],
+        default: [] // Ensures it is always initialized as an empty array
     }
 }, { timestamps: true });
 

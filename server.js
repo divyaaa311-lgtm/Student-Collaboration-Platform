@@ -116,6 +116,45 @@ app.get('/api/projects', async (req, res) => {
         res.status(500).json({ message: "Failed to fetch projects" });
     }
 });
+// --- NEW ROUTE: SUBMIT AN APPLICATION TO A PROJECT ---
+ app.post('/api/projects/:id/apply', async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        const { studentName, studentEmail, linkedinUrl, introduction } = req.body;
+
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: "Project opportunity not found!" });
+        }
+
+        // Check if the deadline has already passed
+        if (new Date() > new Date(project.deadline)) {
+            return res.status(400).json({ message: "❌ This opportunity has expired!" });
+        }
+
+        // Push the new applicant object into the array list
+        project.applicants.push({
+            studentName,
+            studentEmail,
+            linkedinUrl,
+            introduction
+        });
+
+        await project.save();
+        
+        // Re-populate creator data before sending back so sockets don't break
+        const updatedProject = await Project.findById(projectId).populate('creator', 'name email');
+        
+        // Broadcast the update live to all active feeds
+        io.emit('projectUpdated', updatedProject);
+
+        res.status(200).json({ message: "🎉 Application submitted successfully!", project: updatedProject });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Failed to submit application" });
+    }
+});
+
 
 // 6. VERY IMPORTANT: Change app.listen to server.listen
 server.listen(PORT=5000, () => {
