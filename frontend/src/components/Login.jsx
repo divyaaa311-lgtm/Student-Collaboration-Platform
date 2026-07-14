@@ -10,14 +10,14 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://student-collaboration-platform.vercel.app';
       const response = await axios.post(`${API_BASE}/api/login`, { email, password });
       
       localStorage.setItem('studentToken', response.data.token);
       localStorage.setItem('studentName', response.data.user.name);
       localStorage.setItem('studentId', response.data.user.id);
       
-      alert(`Login successful! Welcome back, ${response.data.user.name}.`);
+      alert(`Login successful! Welcome back, ${response.data.user.name}.`);~
       navigate('/dashboard');
     } catch (err) {
       alert(err.response?.data?.message || "Invalid credentials.");

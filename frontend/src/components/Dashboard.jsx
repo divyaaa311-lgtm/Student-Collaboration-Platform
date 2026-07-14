@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Note: Ensure your local import matches 'axios' or leave as standard 'axios'
 import { io } from 'socket.io-client';
 
-// ✅ Ensure your fetches look like this:
+// Ensure your fetches look like this:
 const response = await axios.get(`${API_BASE}/api/projects`);
  // Fallback to standard axios
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://student-collaboration-platform.vercel.app';
 const socket = io(API_BASE);
 
 function Dashboard() {
@@ -56,7 +56,7 @@ function Dashboard() {
     }
 
     socket.on('projectCreated', (newlyPostedProject) => {
-      alert(`📢 Live Notification!\nA new project was just posted: "${newlyPostedProject.title}"`);
+      alert(`Live Notification!\nA new project was just posted: "${newlyPostedProject.title}"`);
       setProjects((prevProjects) => [newlyPostedProject, ...prevProjects]);
     });
 
@@ -97,12 +97,12 @@ function Dashboard() {
       setDeadline('');
       fetchProjects();
     } catch (err) {
-      alert(err.response?.data?.message || "❌ Failed to post project.");
+      alert(err.response?.data?.message || "Failed to post project.");
     } finally {
       setIsPosting(false); 
     }
   };
-
+useeffect
   const handleApplySubmit = async (e) => {
     e.preventDefault();
     setIsApplying(true); 
@@ -122,20 +122,20 @@ function Dashboard() {
       setActiveApplyProject(null); 
       fetchProjects();
     } catch (err) {
-      alert(`❌ Error: ${err.response?.data?.message || "Application submission failed"}`);
+      alert(`Error: ${err.response?.data?.message || "Application submission failed"}`);
     } finally {
       setIsApplying(false); 
     }
   };
 
   const handleDeleteProject = async (projectId) => {
-    if (window.confirm("⚠️ Are you sure you want to delete this opportunity permanentely?")) {
+    if (window.confirm("Are you sure you want to delete this opportunity permanentely?")) {
       try {
         await axiosInstance.delete(`${API_BASE}/api/projects/${projectId}`);
         alert("🗑️ Post deleted successfully!");
         fetchProjects();
       } catch (err) {
-        alert("❌ Failed to remove post.");
+        alert("Failed to remove post.");
       }
     }
   };
@@ -237,13 +237,13 @@ function Dashboard() {
               onClick={() => setViewMode('all')} 
               className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${viewMode === 'all' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
             >
-              🌐 All Feeds
+              All Feeds
             </button>
             <button 
               onClick={() => setViewMode('mine')} 
               className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${viewMode === 'mine' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
             >
-              📂 My Posts
+              My Posts
             </button>
           </div>
 
@@ -305,7 +305,7 @@ function Dashboard() {
                   >
                     <div className="flex justify-between items-start mb-3">
                       <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${hasExpired ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
-                        {hasExpired ? '⚠️ Expired' : 'OPPORTUNITY'}
+                        {hasExpired ? 'Expired' : 'OPPORTUNITY'}
                       </span>
                       {isOwner ? (
                         <button 
@@ -313,7 +313,7 @@ function Dashboard() {
                           className="text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1" 
                           title="Delete this listing"
                         >
-                          🗑️ Delete
+                          Delete
                         </button>
                       ) : (
                         <span className="text-xs font-medium text-slate-400">👤 {project.creator?.name || "Student"}</span>
@@ -325,7 +325,7 @@ function Dashboard() {
                     
                     {project.deadline && (
                       <p className="text-xs text-slate-500 mb-3">
-                        📅 Deadline: <span className={hasExpired ? "text-rose-400 font-bold" : "text-slate-300 font-semibold"}>{new Date(project.deadline).toLocaleDateString()}</span>
+                        Deadline: <span className={hasExpired ? "text-rose-400 font-bold" : "text-slate-300 font-semibold"}>{new Date(project.deadline).toLocaleDateString()}</span>
                       </p>
                     )}
 
@@ -349,7 +349,7 @@ function Dashboard() {
                         onClick={() => setActiveApplyProject(project)} 
                         className={`w-full text-center text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer ${hasExpired ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700/30' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-950/20'}`}
                       >
-                        {hasExpired ? 'Closed' : 'Apply for Opportunity 🚀'}
+                        {hasExpired ? 'Closed' : 'Apply for Opportunity'}
                       </button>
                     )}
 
@@ -412,7 +412,7 @@ function Dashboard() {
                 disabled={isApplying}
                 className={`w-full text-white font-bold py-3 rounded-xl transition-colors cursor-pointer shadow-md mt-2 ${isApplying ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}`}
               >
-                {isApplying ? 'Sending Details...' : 'Submit Application 📨'}
+                {isApplying ? 'Sending Details...' : 'Submit Application '}
               </button>
             </form>
           </div>

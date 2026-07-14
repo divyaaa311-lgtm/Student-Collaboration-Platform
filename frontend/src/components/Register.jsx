@@ -9,9 +9,9 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://student-collaboration-platform.vercel.app';
       await axios.post(`${API_BASE}/api/register`, { name, email, password });
-      alert("🎉 Registration successful! You can now sign in.");
+      alert("Registration successful! You can now sign in.");
       setName('');
       setEmail('');
       setPassword('');

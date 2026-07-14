@@ -14,7 +14,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Corrected origin array with your actual Vercel URL
-    origin: ["https://student-collaboration-platformvercelapp", "http://" ],
+    origin: ["https://student-collaboration-platform.vercel.ap", ],
     methods: ["GET", "POST"]
   }
 });
@@ -147,7 +147,7 @@ app.post('/api/projects/:id/apply', async (req, res) => {
 
         // Double check deadline before saving application
         if (project.deadline && new Date() > new Date(project.deadline)) {
-            return res.status(400).json({ message: "❌ This opportunity has expired!" });
+            return res.status(400).json({ message: "This opportunity has expired!" });
         }
 
         project.applicants.push({ studentName, studentEmail, linkedinUrl, introduction });
