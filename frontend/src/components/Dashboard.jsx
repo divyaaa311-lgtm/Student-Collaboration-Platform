@@ -102,7 +102,7 @@ function Dashboard() {
       setIsPosting(false); 
     }
   };
-useeffect
+useEffect
   const handleApplySubmit = async (e) => {
     e.preventDefault();
     setIsApplying(true); 
