@@ -14,7 +14,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Corrected origin array with your actual Vercel URL
-    origin: ["https://student-collaboration-platform.vercel.ap", "http://localhost:5173"],
+    origin: ["https://student-collaboration-platform.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST","DELETE"],
     
   }
