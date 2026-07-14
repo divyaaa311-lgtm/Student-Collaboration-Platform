@@ -41,7 +41,7 @@ function Dashboard() {
       setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Error fetching projects:", err);
-      setProjects([]);
+     
     }
   };
 
@@ -83,7 +83,7 @@ function Dashboard() {
     try {
       const currentUserId = localStorage.getItem('studentId');
 
-      await axiosInstance.post(`${API_BASE}/api/projects`, {
+      await axios.post(`${API_BASE}/api/projects`, {
         title,
         description,
         skillsRequired: skills ? skills.split(',').map(s => s.trim()) : [], 
@@ -109,14 +109,14 @@ useeffect
     try {
       const savedEmail = localStorage.getItem('studentEmail') || 'test@college.edu';
       
-      await axiosInstance.post(`${API_BASE}/api/projects/${activeApplyProject._id}/apply`, {
+      await axios.post(`${API_BASE}/api/projects/${activeApplyProject._id}/apply`, {
         studentName: userName,
         studentEmail: savedEmail,
         linkedinUrl,
         introduction
       });
 
-      alert("🎉 Application submitted successfully!");
+      alert("Application submitted successfully!");
       setLinkedinUrl('');
       setIntroduction('');
       setActiveApplyProject(null); 
@@ -131,8 +131,8 @@ useeffect
   const handleDeleteProject = async (projectId) => {
     if (window.confirm("Are you sure you want to delete this opportunity permanentely?")) {
       try {
-        await axiosInstance.delete(`${API_BASE}/api/projects/${projectId}`);
-        alert("🗑️ Post deleted successfully!");
+        await axios.delete(`${API_BASE}/api/projects/${projectId}`);
+        alert("Post deleted successfully!");
         fetchProjects();
       } catch (err) {
         alert("Failed to remove post.");
