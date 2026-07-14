@@ -37,7 +37,7 @@ function Dashboard() {
 
   const fetchProjects = async () => {
     try {
-      const response = await axiosInstance.get(`${API_BASE}/api/projects`);
+      const response = await axios.get(`${API_BASE}/api/projects`);
       setProjects(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Error fetching projects:", err);

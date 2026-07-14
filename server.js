@@ -11,11 +11,12 @@ const Project = require('./models/Project');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
+const io = new Server(httpserver, {
   cors: {
     // Corrected origin array with your actual Vercel URL
     origin: ["https://student-collaboration-platform.vercel.ap", ],
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
